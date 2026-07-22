@@ -113,6 +113,9 @@ def run_aidrin_metric(
     threshold: float | None = None,
     frequency: str | None = None,
     timestamp_column: str | None = None,
+    reference_time: str | None = None,
+    event_column: str | None = None,
+    availability_column: str | None = None,
     batch_column: str | None = None,
     target_columns: str | None = None,
 ) -> str:
@@ -147,7 +150,10 @@ def run_aidrin_metric(
         frequency: Interval frequency for temporal_completeness (default "D").
             One of: min (minute), h (hourly), D (daily), W (weekly),
             ME (month-end), QE (quarter-end), YE (year-end).
-        timestamp_column: Datetime column (temporal_completeness).
+        timestamp_column: Datetime column (temporal_completeness, data_freshness).
+        reference_time: As-of date, e.g. "2024-09-20" (data_freshness).
+        event_column: Earlier (event) timestamp column (data_latency).
+        availability_column: Later (availability) timestamp column (data_latency).
         batch_column: Batch/partition column (null_count_trend).
         target_columns: Comma-separated columns to count nulls in (null_count_trend, optional).
     """
@@ -175,6 +181,9 @@ def run_aidrin_metric(
             ("threshold", threshold),
             ("frequency", frequency),
             ("timestamp_column", timestamp_column),
+            ("reference_time", reference_time),
+            ("event_column", event_column),
+            ("availability_column", availability_column),
             ("batch_column", batch_column),
             ("target_columns", target_columns),
         ]

@@ -394,6 +394,26 @@ function workspaceSubmit(targetUrl) {
           gFormData.getAll("target columns for null count trend"),
         );
       }
+      if (gFormData.get("data freshness") === "yes") {
+        selected.push("data_freshness");
+        selectedNames.push("Data Freshness");
+        remoteParams.timestamp_column = gFormData.get(
+          "timestamp column for data freshness",
+        );
+        remoteParams.reference_time = gFormData.get(
+          "reference time for data freshness",
+        );
+      }
+      if (gFormData.get("data latency") === "yes") {
+        selected.push("data_latency");
+        selectedNames.push("Data Latency");
+        remoteParams.event_column = gFormData.get(
+          "event column for data latency",
+        );
+        remoteParams.availability_column = gFormData.get(
+          "availability column for data latency",
+        );
+      }
       if (gFormData.get("custom_outliers") === "yes") {
         const customOutlierRules = serializeCustomOutlierRules();
         if (!validateCustomOutlierRuleSelection(customOutlierRules)) return;
@@ -3535,6 +3555,35 @@ function initWorkspace() {
 }
 
 /**
+ * Show a live "e.g. <col> looks like: <value>" hint under a timestamp dropdown,
+ * so the user can see the column's real format (and supply a compatible
+ * reference). Fetches one raw sample value from the backend on change.
+ * Uses onchange assignment so it stays idempotent across re-population.
+ */
+function _attachColumnSampleHint(dropdownId, hintId) {
+  const dd = document.getElementById(dropdownId);
+  const hint = document.getElementById(hintId);
+  if (!dd || !hint) return;
+  dd.onchange = () => {
+    const col = dd.value;
+    if (!col) {
+      hint.textContent = "";
+      return;
+    }
+    hint.textContent = "Loading example…";
+    fetch("/column-sample?column=" + encodeURIComponent(col))
+      .then((r) => r.json())
+      .then((d) => {
+        hint.textContent =
+          d && d.sample != null ? `e.g. ${col} looks like: ${d.sample}` : "";
+      })
+      .catch(() => {
+        hint.textContent = "";
+      });
+  };
+}
+
+/**
  * Populate all feature dropdowns and checkbox containers in the workspace.
  * Called after /feature-set returns data.
  */
@@ -3629,6 +3678,21 @@ function populateWorkspaceDropdowns(data) {
   );
   fillDropdown("temporalCompletenessColumnDropdown", allFeatures);
   fillDropdown("nullCountTrendBatchDropdown", allFeatures);
+  fillDropdown("dataFreshnessColumnDropdown", allFeatures);
+  fillDropdown("dataLatencyEventDropdown", allFeatures);
+  fillDropdown("dataLatencyAvailabilityDropdown", allFeatures);
+  _attachColumnSampleHint(
+    "dataFreshnessColumnDropdown",
+    "dataFreshnessColumnExample",
+  );
+  _attachColumnSampleHint(
+    "dataLatencyEventDropdown",
+    "dataLatencyEventExample",
+  );
+  _attachColumnSampleHint(
+    "dataLatencyAvailabilityDropdown",
+    "dataLatencyAvailabilityExample",
+  );
   fillCheckboxContainer(
     "nullCountTrendTargetColumnsCheckbox",
     allFeatures,

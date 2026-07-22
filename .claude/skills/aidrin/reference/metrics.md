@@ -3,7 +3,7 @@
 ## Contents
 
 - [Invocation & conventions](#invocation--conventions)
-- [Data quality](#data-quality): completeness, duplicity, outliers, row-level-completeness, feature-coverage-ratio, temporal-completeness, null-count-trend
+- [Data quality](#data-quality): completeness, duplicity, outliers, row-level-completeness, feature-coverage-ratio, temporal-completeness, null-count-trend, data-freshness, data-latency
 - [Impact on AI](#impact-on-ai): correlations, feature-relevance
 - [Fairness & bias](#fairness--bias): class-imbalance, statistical-rates, representation-rate
 - [Data governance](#data-governance): k-anonymity, l-diversity, t-closeness, entropy-risk, single-attribute-risk, multiple-attribute-risk, hipaa-compliance
@@ -172,6 +172,57 @@ aidrin run temporal-completeness path/to/timeseries.csv --timestamp-column time 
 
 ```bash
 aidrin run null-count-trend path/to/batches.csv --batch-column machine_id --target-columns "temperature,pressure"
+```
+
+---
+
+### data-freshness
+
+- **Syntax:** `aidrin run data-freshness <file> --timestamp-column <col> --reference-time <date>`
+- **Args:**
+  - `--timestamp-column` (required) — the record-time column. Accepts datetime,
+    Unix epoch (s/ms/us), or date strings (ISO + common + mixed formats).
+  - `--reference-time` (required) — the as-of date to measure staleness against
+    (e.g. `2024-09-20`). Required because a static file has no meaningful "now";
+    it is echoed back for reproducibility.
+- **Output keys:**
+  - `Data Freshness (days)` — scalar age of the newest record at the reference date (negative if records post-date it)
+  - `Newest Record` / `Reference Time` — the timestamps used
+  - `Age Distribution (days)` — object with `p50`/`p90`/`p99`/`max` record ages
+  - `Unparsable Timestamps` — count of values that could not be parsed
+  - `Total Records` — integer
+  - `Data Freshness Visualization` — base64 histogram (stripped by default)
+  - `Description` — string
+- **Direction:** lower = fresher. Large positive = stale data.
+
+**Example:**
+
+```bash
+aidrin run data-freshness path/to/events.csv --timestamp-column created_at --reference-time 2024-09-20
+```
+
+---
+
+### data-latency
+
+- **Syntax:** `aidrin run data-latency <file> --event-column <col> --availability-column <col>`
+- **Args:**
+  - `--event-column` (required) — the earlier (event) timestamp column
+  - `--availability-column` (required) — the later (availability/ingestion) timestamp column
+  - Both accept datetime, epoch, or string forms (see data-freshness).
+- **Output keys:**
+  - `Mean Latency (s)` / `Median Latency (s)` / `P95 Latency (s)` / `Max Latency (s)` — delay stats in seconds
+  - `Negative Latency Count` — records where availability precedes the event (clock skew / swapped columns)
+  - `Unparsable Timestamps` — count across both columns
+  - `Records Considered` — integer count of rows with both timestamps parseable
+  - `Data Latency Visualization` — base64 histogram (stripped by default)
+  - `Description` — string
+- **Direction:** lower latency = more timely data. Non-zero negative count warrants investigation.
+
+**Example:**
+
+```bash
+aidrin run data-latency path/to/events.csv --event-column event_time --availability-column ingested_at
 ```
 
 ---

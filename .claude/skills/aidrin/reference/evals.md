@@ -92,6 +92,32 @@ exit=0
 
 ---
 
+## Scenario 5: Timeliness metrics (data-freshness, data-latency) with multi-format timestamps
+
+**Commands:**
+```bash
+# datetime column
+aidrin run data-freshness AdastaJobsMI250_15days.parquet --timestamp-column end_time --reference-time 2024-09-20
+# epoch-seconds column (multi-format path)
+aidrin run data-freshness AdastaJobsMI250_15days.parquet --timestamp-column time_limit --reference-time 2024-09-20
+aidrin run data-latency AdastaJobsMI250_15days.parquet --event-column submit_time --availability-column start_time
+```
+
+**Outcome:** All exited 0 and returned valid JSON matching the metrics.md entries.
+- `data-freshness` on `end_time` (datetime): 4.23 days as of 2024-09-20.
+- `data-freshness` on `time_limit` (Unix epoch seconds): 5.08 days — confirms the
+  coerce-datetime path auto-detects epoch columns, not just parsed datetimes.
+- `data-latency` (`submit_time` → `start_time`, queue delay): median 1s, max ~13 days,
+  0 negative-latency records.
+
+Both required parameters are enforced (omitting `--reference-time` /
+`--event-column` returns a validation error in the JSON body).
+
+**PASS** — timeliness metrics work end-to-end, including the multi-format
+(datetime + epoch + string) timestamp handling.
+
+---
+
 ## Summary
 
 | Scenario | Result |
@@ -100,5 +126,6 @@ exit=0
 | 2. Non-CSV schema read + metric run (JSON) | PASS |
 | 3. Absent metric (`data_drift`) → scaffold + run end-to-end | PASS |
 | 4. Error isolation — bad column, exit code behavior | PASS (with caveat: always exits 0) |
+| 5. Timeliness metrics (data-freshness, data-latency) + multi-format timestamps | PASS |
 
 All core building blocks work. One behavioral note: `aidrin run` always exits 0 regardless of validation errors; errors are indicated only in the JSON body (`"ErrorType": "Validation Error"`). The skill's per-metric isolation pattern handles this correctly in practice, but skill authors should inspect JSON output rather than relying on exit codes.

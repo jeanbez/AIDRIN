@@ -36,6 +36,9 @@ class HeadlessConfig:
     threshold: Optional[float] = None
     frequency: Optional[str] = None
     timestamp_column: Optional[str] = None
+    reference_time: Optional[str] = None
+    event_column: Optional[str] = None
+    availability_column: Optional[str] = None
     batch_column: Optional[str] = None
     target_columns: Optional[List[str]] = field(default_factory=list)
     save_images: Optional[bool] = None
@@ -59,6 +62,9 @@ class HeadlessConfig:
             "distance-metric": "distance_metric",
             "required-columns": "required_columns",
             "timestamp-column": "timestamp_column",
+            "reference-time": "reference_time",
+            "event-column": "event_column",
+            "availability-column": "availability_column",
             "batch-column": "batch_column",
             "target-columns": "target_columns",
             "file-path": "file_path",

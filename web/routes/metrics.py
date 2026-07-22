@@ -26,6 +26,8 @@ from aidrin.structured_data_metrics.conditional_demo_disp import (
     conditional_demographic_disparity,
 )
 from aidrin.structured_data_metrics.feature_coverage_ratio import feature_coverage_ratio
+from aidrin.structured_data_metrics.data_freshness import data_freshness
+from aidrin.structured_data_metrics.data_latency import data_latency
 from aidrin.structured_data_metrics.null_count_trend import null_count_trend
 from aidrin.structured_data_metrics.row_level_completeness import row_level_completeness
 from aidrin.structured_data_metrics.temporal_completeness import temporal_completeness
@@ -106,6 +108,7 @@ def data_quality():
             m for m in (
                 "completeness", "row level completeness", "feature coverage ratio",
                 "temporal completeness", "null count trend",
+                "data freshness", "data latency",
                 "outliers", "duplicity", "custom_outliers",
             ) if request.form.get(m) == "yes"
         ]
@@ -210,6 +213,40 @@ def data_quality():
                             )
                         metric_time_log.info(
                             "Null Count Trend took %.2f seconds", time.time() - t0
+                        )
+
+                if "data freshness" in selected:
+                    timestamp_column = request.form.get("timestamp column for data freshness")
+                    reference_time = request.form.get("reference time for data freshness")
+                    if not timestamp_column or not reference_time:
+                        final_dict["Data Freshness"] = {
+                            "Error": "Data freshness needs a timestamp column and a reference date."
+                        }
+                    else:
+                        t0 = time.time()
+                        with tracer.start_as_current_span("metric.data_freshness"):
+                            final_dict["Data Freshness"] = data_freshness(
+                                timestamp_column, reference_time, file_info
+                            )
+                        metric_time_log.info(
+                            "Data Freshness took %.2f seconds", time.time() - t0
+                        )
+
+                if "data latency" in selected:
+                    event_column = request.form.get("event column for data latency")
+                    availability_column = request.form.get("availability column for data latency")
+                    if not event_column or not availability_column:
+                        final_dict["Data Latency"] = {
+                            "Error": "Data latency needs an event column and an availability column."
+                        }
+                    else:
+                        t0 = time.time()
+                        with tracer.start_as_current_span("metric.data_latency"):
+                            final_dict["Data Latency"] = data_latency(
+                                event_column, availability_column, file_info
+                            )
+                        metric_time_log.info(
+                            "Data Latency took %.2f seconds", time.time() - t0
                         )
 
                 if "outliers" in selected:

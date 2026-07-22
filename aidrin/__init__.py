@@ -171,6 +171,52 @@ def calculate_null_count_trend(batch_column, target_columns, file_info):
     return null_count_trend.apply(args=(batch_column, target_columns, file_info)).get()
 
 
+def calculate_data_freshness(timestamp_column, reference_time, file_info):
+    """Age of the newest record relative to an as-of reference date.
+
+    Parameters
+    ----------
+    timestamp_column : str
+        Column defining each record's time (datetime, epoch, or string form).
+    reference_time : str
+        The as-of date to measure staleness against (e.g. ``"2024-09-20"``).
+    file_info : tuple
+        ``(file_path, file_name, file_type)``
+
+    Returns
+    -------
+    dict
+        ``{"Data Freshness (days)": float, ..., "Data Freshness Visualization":
+        base64_str}`` or ``{"Error": str}``.
+    """
+    _eager_celery()
+    from aidrin.structured_data_metrics.data_freshness import data_freshness
+    return data_freshness.apply(args=(timestamp_column, reference_time, file_info)).get()
+
+
+def calculate_data_latency(event_column, availability_column, file_info):
+    """Delay between an event timestamp and an availability timestamp, per record.
+
+    Parameters
+    ----------
+    event_column : str
+        Column with the earlier (event) timestamp.
+    availability_column : str
+        Column with the later (availability/ingestion) timestamp.
+    file_info : tuple
+        ``(file_path, file_name, file_type)``
+
+    Returns
+    -------
+    dict
+        ``{"Median Latency (s)": float, ..., "Data Latency Visualization":
+        base64_str}`` or ``{"Error": str}``.
+    """
+    _eager_celery()
+    from aidrin.structured_data_metrics.data_latency import data_latency
+    return data_latency.apply(args=(event_column, availability_column, file_info)).get()
+
+
 def calculate_custom_outliers(
     file_info,
     rules,
@@ -484,6 +530,8 @@ __all__ = [
     "calculate_feature_coverage_ratio",
     "calculate_temporal_completeness",
     "calculate_null_count_trend",
+    "calculate_data_freshness",
+    "calculate_data_latency",
     # Fairness / Bias
     "calculate_class_distribution",
     "calculate_representation_rate",

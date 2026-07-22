@@ -94,6 +94,49 @@
 
         <div class="checkboxContainerIndividual">
           <label class="material-checkbox">
+            <input type="checkbox" name="data freshness" onchange="toggleValue(this)" />
+            <span class="checkmark"></span>
+            Check data freshness
+            <span class="info-icon">i<span class="info-text">This option reports how old the newest record is relative to a reference date you supply. The timestamp column may be a datetime, a Unix epoch, or a date string.</span></span>
+          </label>
+          <div class="metric-inputs mt-3 space-y-3" style="display: none;">
+            <div>
+              <label class="block text-sm font-medium mb-1.5 text-gray-900 dark:text-white">Timestamp column:</label>
+              <select name="timestamp column for data freshness" id="dataFreshnessColumnDropdown" required class="w-full" style="max-width: none;"><option value="" disabled selected>Select a feature</option></select>
+              <p id="dataFreshnessColumnExample" class="text-xs mt-1" style="color: var(--textColorSecondary);"></p>
+            </div>
+            <div>
+              <label class="block text-sm font-medium mb-1.5 text-gray-900 dark:text-white">Reference (as-of) date or time:</label>
+              <input class="textWrapper w-full" type="text" name="reference time for data freshness"
+                     placeholder="e.g. 2024-09-15, 2024-09-15 14:30:00, or a Unix epoch" style="max-width: none;" />
+              <p class="text-xs mt-1" style="color: var(--textColorSecondary);">Accepts a date, a full datetime, or a Unix epoch — same formats as the timestamp column.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="checkboxContainerIndividual">
+          <label class="material-checkbox">
+            <input type="checkbox" name="data latency" onchange="toggleValue(this)" />
+            <span class="checkmark"></span>
+            Check data latency
+            <span class="info-icon">i<span class="info-text">This option reports the delay between two timestamp columns (availability minus event) per record, including a count of negative delays that indicate clock skew or swapped columns.</span></span>
+          </label>
+          <div class="metric-inputs mt-3 space-y-3" style="display: none;">
+            <div>
+              <label class="block text-sm font-medium mb-1.5 text-gray-900 dark:text-white">Event column (earlier):</label>
+              <select name="event column for data latency" id="dataLatencyEventDropdown" required class="w-full" style="max-width: none;"><option value="" disabled selected>Select a feature</option></select>
+              <p id="dataLatencyEventExample" class="text-xs mt-1" style="color: var(--textColorSecondary);"></p>
+            </div>
+            <div>
+              <label class="block text-sm font-medium mb-1.5 text-gray-900 dark:text-white">Availability column (later):</label>
+              <select name="availability column for data latency" id="dataLatencyAvailabilityDropdown" required class="w-full" style="max-width: none;"><option value="" disabled selected>Select a feature</option></select>
+              <p id="dataLatencyAvailabilityExample" class="text-xs mt-1" style="color: var(--textColorSecondary);"></p>
+            </div>
+          </div>
+        </div>
+
+        <div class="checkboxContainerIndividual">
+          <label class="material-checkbox">
             <input type="checkbox" name="outliers" onchange="toggleValue(this)" />
             <span class="checkmark"></span>
             Check outliers

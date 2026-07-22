@@ -202,6 +202,37 @@ def retrieve_uploaded_file():
     return jsonify({"error": "No file path found"}), 404
 
 
+@core_bp.route("/column-sample", methods=["GET"])
+def column_sample():
+    """Return the first non-null raw value of a column, for a UI format hint.
+
+    Used by the timeliness metrics' timestamp pickers to show what the selected
+    column actually looks like (so the user can supply a compatible reference).
+    """
+    column = request.args.get("column", "")
+    file_path = session.get("uploaded_file_path")
+    if not column or not file_path:
+        return jsonify({"sample": None})
+    try:
+        from aidrin.file_handling.file_parser import read_file
+        df = read_file((
+            file_path,
+            session.get("uploaded_file_name"),
+            session.get("uploaded_file_type"),
+        ))
+        if column not in df.columns:
+            return jsonify({"sample": None})
+        series = df[column].dropna()
+        if series.empty:
+            return jsonify({"sample": None})
+        sample = str(series.iloc[0])
+        if len(sample) > 60:
+            sample = sample[:57] + "..."
+        return jsonify({"column": column, "sample": sample})
+    except Exception:
+        return jsonify({"sample": None})
+
+
 @core_bp.route("/clear", methods=["GET", "POST"])
 def clear_file():
     file_upload_time_log.info("Clearing File")

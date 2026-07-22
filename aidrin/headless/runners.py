@@ -8,6 +8,8 @@ from aidrin.structured_data_metrics.add_noise import return_noisy_stats
 from aidrin.structured_data_metrics.class_imbalance import calc_imbalance_degree
 from aidrin.structured_data_metrics.completeness import completeness
 from aidrin.structured_data_metrics.correlation_score import calc_correlations
+from aidrin.structured_data_metrics.data_freshness import data_freshness
+from aidrin.structured_data_metrics.data_latency import data_latency
 from aidrin.structured_data_metrics.custom_outliers import custom_outliers
 from aidrin.structured_data_metrics.duplicity import duplicity
 from aidrin.structured_data_metrics.feature_coverage_ratio import feature_coverage_ratio
@@ -86,6 +88,18 @@ def run_completeness(file_path: str, file_type: Optional[str], file_name: Option
 def run_duplicity(file_path: str, file_type: Optional[str], file_name: Optional[str]) -> Dict[str, Any]:
     file_info = _build_file_info(file_path, file_type, file_name)
     return _call_task(duplicity, file_info)
+
+
+def run_data_freshness(file_path: str, file_type: Optional[str], file_name: Optional[str],
+                       timestamp_column: str, reference_time: str) -> Dict[str, Any]:
+    file_info = _build_file_info(file_path, file_type, file_name)
+    return _call_task(data_freshness, timestamp_column, reference_time, file_info)
+
+
+def run_data_latency(file_path: str, file_type: Optional[str], file_name: Optional[str],
+                     event_column: str, availability_column: str) -> Dict[str, Any]:
+    file_info = _build_file_info(file_path, file_type, file_name)
+    return _call_task(data_latency, event_column, availability_column, file_info)
 
 
 def run_outliers(file_path: str, file_type: Optional[str], file_name: Optional[str]) -> Dict[str, Any]:

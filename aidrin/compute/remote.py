@@ -56,6 +56,14 @@ def remote_metric_runner(metric_name, file_path, file_name, file_type, **params)
             result["Null Count Trend"] = aidrin.calculate_null_count_trend(
                 params.get("batch_column", ""), params.get("target_columns", []), file_info
             )
+        if "data_freshness" in selected:
+            result["Data Freshness"] = aidrin.calculate_data_freshness(
+                params.get("timestamp_column", ""), params.get("reference_time", ""), file_info
+            )
+        if "data_latency" in selected:
+            result["Data Latency"] = aidrin.calculate_data_latency(
+                params.get("event_column", ""), params.get("availability_column", ""), file_info
+            )
         if "outliers" in selected:
             r = aidrin.calculate_outliers(file_info)
             r["Description"] = (
@@ -258,6 +266,12 @@ def remote_metric_runner(metric_name, file_path, file_name, file_type, **params)
         ),
         "null_count_trend": lambda: aidrin.calculate_null_count_trend(
             params.get("batch_column", ""), params.get("target_columns", []), file_info
+        ),
+        "data_freshness": lambda: aidrin.calculate_data_freshness(
+            params.get("timestamp_column", ""), params.get("reference_time", ""), file_info
+        ),
+        "data_latency": lambda: aidrin.calculate_data_latency(
+            params.get("event_column", ""), params.get("availability_column", ""), file_info
         ),
         "correlations": lambda: aidrin.calculate_correlations(
             params.get("columns", []), file_info

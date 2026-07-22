@@ -115,6 +115,9 @@ Examples:
    aidrin run null-count-trend /path/to/sample_dataset.csv --batch-column zipcode
    # temporal-completeness needs a datetime column; --frequency is one of: ms, s, min, h, D, W, ME, QE, YE (default D)
    aidrin run temporal-completeness /path/to/timeseries.csv --timestamp-column timestamp --frequency D
+   # timeliness — timestamp columns accept datetime, Unix epoch, or date strings
+   aidrin run data-freshness /path/to/events.csv --timestamp-column created_at --reference-time 2024-09-20
+   aidrin run data-latency /path/to/events.csv --event-column event_time --availability-column ingested_at
 
    # Custom criteria outliers with simple valid-value rule shorthand
    aidrin run outliers-custom /path/to/sample_dataset.csv \
@@ -268,6 +271,12 @@ Available Metrics
    * - Data Quality
      - ``null-count-trend``
      - ``--batch-column``, ``--target-columns`` (optional)
+   * - Data Quality
+     - ``data-freshness``
+     - ``--timestamp-column``, ``--reference-time`` (as-of date, e.g. ``2024-09-20``)
+   * - Data Quality
+     - ``data-latency``
+     - ``--event-column``, ``--availability-column``
    * - Data Quality
      - ``outliers-custom``
      - ``rules-json``

@@ -14,6 +14,8 @@ from .runners import (
     run_class_imbalance,
     run_completeness,
     run_correlations,
+    run_data_freshness,
+    run_data_latency,
     run_differential_privacy,
     run_duplicity,
     run_entropy_risk,
@@ -77,6 +79,18 @@ METRIC_REGISTRY: Dict[str, Dict[str, Any]] = {
         "description": "Null counts grouped by a batch column, to spot quality regressions.",
         "runner": run_null_count_trend,
         "required_args": ["batch-column", "target-columns"],
+    },
+    "data_freshness": {
+        "category": "data-quality",
+        "description": "Age of the newest record relative to an as-of reference date.",
+        "runner": run_data_freshness,
+        "required_args": ["timestamp-column", "reference-time"],
+    },
+    "data_latency": {
+        "category": "data-quality",
+        "description": "Delay between an event timestamp and an availability timestamp.",
+        "runner": run_data_latency,
+        "required_args": ["event-column", "availability-column"],
     },
     "outliers_custom": {
         "category": "data-quality",
@@ -483,6 +497,30 @@ def run_metric(
         )
         return _finalize(result)
 
+    if metric_key == "data_freshness":
+        timestamp_column = kwargs.get("timestamp_column")
+        reference_time = kwargs.get("reference_time")
+        if not timestamp_column:
+            raise ValueError("timestamp_column is required for data_freshness")
+        if not reference_time:
+            raise ValueError("reference_time is required for data_freshness")
+        result = metric["runner"](
+            file_path, file_type, file_name, timestamp_column, reference_time
+        )
+        return _finalize(result)
+
+    if metric_key == "data_latency":
+        event_column = kwargs.get("event_column")
+        availability_column = kwargs.get("availability_column")
+        if not event_column or not availability_column:
+            raise ValueError(
+                "event_column and availability_column are required for data_latency"
+            )
+        result = metric["runner"](
+            file_path, file_type, file_name, event_column, availability_column
+        )
+        return _finalize(result)
+
     if metric_key == "null_count_trend":
         batch_column = kwargs.get("batch_column")
         if not batch_column:
@@ -644,6 +682,9 @@ def run_batch_metrics(
         "threshold": config_obj.threshold,
         "frequency": config_obj.frequency,
         "timestamp_column": config_obj.timestamp_column,
+        "reference_time": config_obj.reference_time,
+        "event_column": config_obj.event_column,
+        "availability_column": config_obj.availability_column,
         "batch_column": config_obj.batch_column,
         "target_columns": config_obj.target_columns,
         "save_images": bool(config_obj.save_images) if config_obj.save_images is not None else True,

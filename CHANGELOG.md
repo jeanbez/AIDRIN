@@ -34,6 +34,18 @@ All notable changes to AIDRIN are documented here. This project loosely follows
 
 ### Added
 
+- **New timeliness metrics** (CLI, Python library, batch, MCP, Globus, and web
+  UI), under Data Quality, with a shared multi-format datetime parser
+  (`aidrin/file_handling/datetime_utils.py`) that accepts native datetime, Unix
+  epochs (s/ms/us auto-detected), and date strings (ISO + common + mixed),
+  normalizing to tz-naive UTC and reporting unparsable-value counts:
+  - `data_freshness` — age of the newest record versus a required as-of
+    `reference_time` (params: `timestamp_column`, `reference_time`). Reports the
+    headline age, an age distribution, and the reference used (for reproducibility).
+  - `data_latency` — per-record delay between two timestamps (params:
+    `event_column`, `availability_column`). Reports mean/median/p95/max seconds
+    and a negative-latency (clock-skew) count.
+
 - **New data-quality completeness metrics** (CLI, Python library, batch, MCP,
   Globus, and web UI):
   - `row_level_completeness` — % of rows whose *required* columns are all

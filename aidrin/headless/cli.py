@@ -260,6 +260,9 @@ def _build_run_kwargs(args: argparse.Namespace) -> dict:
         "threshold": getattr(args, "threshold", None),
         "frequency": getattr(args, "frequency", None),
         "timestamp_column": getattr(args, "timestamp_column", None),
+        "reference_time": getattr(args, "reference_time", None),
+        "event_column": getattr(args, "event_column", None),
+        "availability_column": getattr(args, "availability_column", None),
         "batch_column": getattr(args, "batch_column", None),
         "target_columns": _parse_list(getattr(args, "target_columns", None)),
         "rules": parsed_rules,
@@ -353,6 +356,15 @@ def _add_required_metric_args(parser: argparse.ArgumentParser, required_args: Li
         elif arg == "timestamp-column":
             parser.add_argument("--timestamp-column", dest="timestamp_column", default=None,
                                 help="Datetime column name")
+        elif arg == "reference-time":
+            parser.add_argument("--reference-time", dest="reference_time", default=None,
+                                help="As-of date to measure freshness against (e.g. 2024-09-20)")
+        elif arg == "event-column":
+            parser.add_argument("--event-column", dest="event_column", default=None,
+                                help="Column with the earlier (event) timestamp")
+        elif arg == "availability-column":
+            parser.add_argument("--availability-column", dest="availability_column", default=None,
+                                help="Column with the later (availability) timestamp")
         elif arg == "batch-column":
             parser.add_argument("--batch-column", dest="batch_column", default=None,
                                 help="Column that groups rows into batches")

@@ -343,6 +343,18 @@ as well as row-level completeness, feature coverage, temporal completeness, and 
   - **Parameters**: Batch column, and optional target columns (defaults to all other columns).
   - **Result**: A chart of null counts per batch.
 
+- **Data Freshness**:
+
+  - **Method**: Reports how old the newest record is relative to a reference date you supply (``reference_time − max(timestamp)``). The reference date is required, since a static file has no meaningful "now", and it is echoed back for reproducibility. The timestamp column may be a datetime, a Unix epoch, or a date string (mixed formats are handled); unparsable values are counted.
+  - **Parameters**: Timestamp column and a reference (as-of) date.
+  - **Result**: The newest-record age in days, an age distribution (percentiles), the reference used, an unparsable-timestamp count, and a histogram of record ages.
+
+- **Data Latency**:
+
+  - **Method**: Computes the per-record delay between two timestamp columns (``availability − event``, in seconds). Negative delays (availability before the event) usually indicate clock skew or swapped columns and are counted separately rather than hidden. Both columns accept datetime, epoch, or string forms.
+  - **Parameters**: An event column (earlier) and an availability column (later).
+  - **Result**: Mean/median/p95/max latency in seconds, a negative-latency count, an unparsable-timestamp count, and a histogram of delays.
+
 - **Duplicates**:
 
   - **Method**: Identifies duplicate rows by comparing all column values. The duplicity score is the proportion of duplicate rows in the dataset.
